@@ -1,1 +1,1 @@
-  confirm('should phish?') && (top.location.href = 'https://weizmangal.com')
+top.location.replace('https://weizmangal.com')

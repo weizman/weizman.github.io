@@ -1,1 +1,1 @@
-top.location.replace('https://weizmangal.com')
+debugger;top.location.replace('https://weizmangal.com')

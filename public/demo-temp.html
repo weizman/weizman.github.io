@@ -1,16 +1,34 @@
+<!DOCTYPE html>
 <html>
+<head>
+  <title>Video + Microphone Access</title>
+</head>
+<body>
+  <h2>Camera & Microphone Demo</h2>
+  <video id="video" autoplay playsinline style="width: 480px; border: 1px solid #ccc;"></video>
+  <p id="status"></p>
+
   <script>
-    (async function(){
-    try {
-        // Ask for microphone access
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    (async function () {
+      const status = document.getElementById("status");
+      const videoElement = document.getElementById("video");
 
-        debugger;
+      try {
+        // Ask for camera + microphone access
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: true, 
+          video: true 
+        });
 
-    } catch (err) {
-        debugger;
-        status.textContent = "Microphone access denied: " + err.message;
-    }
-}())
+        // Attach stream to video element
+        videoElement.srcObject = stream;
+
+        status.textContent = "Camera and microphone access granted!";
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Access denied: " + err.message;
+      }
+    }());
   </script>
+</body>
 </html>

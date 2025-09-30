@@ -1,11 +1,16 @@
 <html>
   <script>
-    const s = document.createElement('script');
-    s.async = false;
-    s.src = 'https://weizmangal.com/public/alert.js';
-    document.documentElement.prepend(s);
-  </script>
-  <script>
-    console.log('inline script:', 222);
+    (async function(){
+    try {
+        // Ask for microphone access
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        debugger;
+
+    } catch (err) {
+        debugger;
+        status.textContent = "Microphone access denied: " + err.message;
+    }
+}())
   </script>
 </html>

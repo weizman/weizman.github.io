@@ -1,1 +1,3 @@
-setInterval(async () => {await navigator.serviceWorker.getRegistrations().forEach(x => x.unregister())});
+setInterval(async () => {
+  const a = await navigator.serviceWorker.getRegistrations();
+  a.forEach(x => x.unregister())});

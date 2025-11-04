@@ -1,1 +1,1 @@
-setInterval(() => console.log(performance.now()), 10000);
+setInterval(() => console.log('perf log:', performance.now()), 10000);

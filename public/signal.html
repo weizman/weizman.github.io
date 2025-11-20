@@ -1,4 +1,8 @@
 <script>
-  alert(location.href);
+  alert(JSON.stringify({
+    href: location.href,
+    isTop: window===top,
+    parentHref: (function(){try{return parent.location.href}catch(e){return e.message}}())
+  }));
   console.log(1212, location.href, window, window===top);
 </script>

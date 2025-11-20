@@ -1,9 +1,5 @@
 <script>
-  1 || alert(JSON.stringify({
-    href: location.href,
-    isTop: window===top,
-    parentHref: (function(){try{return parent.location.href}catch(e){return e.message}}())
-  }));
-  const a = localStorage.a;
-  eval(a);
+  addEventListener('message', e => {
+    alert(JSON.stringify(e?.data));
+  })
 </script>

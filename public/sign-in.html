@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login</title>
+  <style>
+    :root{
+      --bg: #ffffff;
+      --header: #f6f7f9;
+      --panel: #f1f3f4;
+      --bubble: #eef1f5;
+      --text: #1f1f1f;
+      --muted: #6b7280;
+      --blue: #3b82f6;
+      --radius-pill: 999px;
+      --radius-card: 18px;
+      font-synthesis: style;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height:100vh;
+      display:flex;
+      justify-content:center;
+    }
+
+    /* Phone-like frame (optional; remove if you want full-bleed) */
+    .app{
+      width: 380px;
+      max-width: 100vw;
+      height: 100vh;
+      display:flex;
+      flex-direction:column;
+      background: var(--bg);
+    }
+
+    /* Top header like the screenshot */
+    .topbar{
+      background: var(--header);
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom: 1px solid #eceff3;
+    }
+    .topbar .title{
+      font-weight:600;
+      font-size:20px;
+      letter-spacing:.2px;
+      color:#444;
+    }
+    .topbar .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .avatar{
+      width:28px;height:28px;border-radius:50%;
+      background:
+        radial-gradient(circle at 30% 30%, #ffd7a8, #c27b44 55%, #6b3f1f 70%),
+        radial-gradient(circle at 65% 20%, #2d2d2d, #111 60%);
+      border: 1px solid #e5e7eb;
+    }
+    .icon{
+      width:20px;height:20px;opacity:.7;
+      display:grid;place-items:center;
+      font-size:18px;line-height:1;
+      user-select:none;
+    }
+
+    /* Chat area */
+    .chat{
+      flex:1;
+      padding: 18px 14px 10px;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .row{
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+    }
+    .row.assistant{justify-content:flex-start;}
+    .row.user{justify-content:flex-end;}
+
+    .spark{
+      width:26px;height:26px;flex:0 0 26px;
+      display:grid;place-items:center;
+      margin-top:2px;
+    }
+    .spark svg{width:20px;height:20px;display:block}
+
+    .bubble{
+      background: var(--bubble);
+      border-radius: 22px;
+      padding: 12px 14px;
+      max-width: 78%;
+      font-size:16px;
+      line-height:1.35;
+      box-shadow: 0 1px 0 rgba(0,0,0,.02);
+    }
+    .bubble.user{
+      background: var(--bubble);
+      border-radius: 28px;
+      padding: 14px 16px;
+      max-width: 80%;
+    }
+    .bubble .sub{
+      color: var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+
+    /* Login form inside a "user bubble" */
+    form{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:6px;
+    }
+    label{
+      font-size:12px;
+      color: var(--muted);
+      margin-left:2px;
+    }
+    input{
+      width:100%;
+      border:1px solid #e5e7eb;
+      background:#fff;
+      padding:11px 12px;
+      border-radius:12px;
+      font-size:15px;
+      outline:none;
+      transition:border .15s, box-shadow .15s;
+    }
+    input:focus{
+      border-color:#c7d2fe;
+      box-shadow:0 0 0 3px rgba(99,102,241,.12);
+    }
+    .btn{
+      margin-top:4px;
+      border:none;
+      background:#111827;
+      color:#fff;
+      padding:11px 14px;
+      border-radius:12px;
+      font-size:15px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .btn:active{transform:translateY(1px)}
+    .form-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:2px;
+      font-size:13px;
+      color: var(--muted);
+    }
+    .form-row a{
+      color:#4f46e5;
+      text-decoration:none;
+    }
+
+    /* Bottom input panel like screenshot */
+    .composer-wrap{
+      padding: 10px 10px 14px;
+      background: var(--bg);
+    }
+    .composer{
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 8px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      border: 1px solid #e9edf2;
+    }
+    .chips{
+      display:flex;gap:8px;align-items:center;
+    }
+    .chip{
+      background:#e4e7eb;
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:13px;
+      display:flex;gap:6px;align-items:center;
+      color:#111;
+    }
+    .chip .plus{
+      width:28px;height:28px;border-radius:10px;
+      background:#e4e7eb;display:grid;place-items:center;
+      font-weight:700;
+    }
+    .fake-input{
+      background: transparent;
+      border:none;
+      padding:8px 6px 10px;
+      font-size:16px;
+      color:#9aa0a6;
+    }
+    .composer-footer{
+      display:flex;justify-content:flex-end;gap:10px;align-items:center;
+      padding:0 4px 2px;
+      color:#111;opacity:.75;font-size:12px;
+    }
+    .mic{
+      width:30px;height:30px;border-radius:10px;background:#e4e7eb;
+      display:grid;place-items:center;font-size:16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <div class="topbar">
+      <div class="title">Login</div>
+      <div class="actions">
+        <div class="avatar" title="Profile"></div>
+        <div class="icon" title="More">⋮</div>
+        <div class="icon" title="Close">✕</div>
+      </div>
+    </div>
+
+    <!-- Chat / content -->
+    <div class="chat">
+      <!-- Assistant prompt -->
+      <div class="row assistant">
+        <div class="spark" aria-hidden="true">
+          <!-- simple sparkle -->
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 2l2.2 5.8L20 10l-5.8 2.2L12 18l-2.2-5.8L4 10l5.8-2.2L12 2z"
+                  fill="#3b82f6"/>
+          </svg>
+        </div>
+        <div class="bubble">
+          Hi! Please sign in to continue 🙂
+          <div class="sub">We’ll never share your email.</div>
+        </div>
+      </div>
+
+      <!-- "User bubble" with login form -->
+      <div class="row user">
+        <div class="bubble user" role="region" aria-label="Login form">
+          <div style="font-weight:600;margin-bottom:6px;">Sign in</div>
+          <form action="#" method="post">
+            <div>
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+            </div>
+            <div>
+              <label for="password">Password</label>
+              <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+            </div>
+            <button class="btn" type="submit">Continue</button>
+
+            <div class="form-row">
+              <label style="display:flex;gap:6px;align-items:center;">
+                <input type="checkbox" name="remember" style="width:auto;margin:0;accent-color:#111;">
+                Remember me
+              </label>
+              <a href="#">Forgot password?</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom composer area (kept for the look) -->
+    <div class="composer-wrap">
+      <div class="composer">
+        <div class="chips">
+          <div class="chip">📌 Share current tab</div>
+          <div class="plus">＋</div>
+        </div>
+        <div class="fake-input">Ask</div>
+        <div class="composer-footer">
+          <div>Fast ▾</div>
+          <div class="mic">🎙️</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Object Viewer</title>
+    <style>
+        :root {
+            --bg: #0b0c10;
+            --panel: #151820;
+            --panel-2: #1c2030;
+            --text: #e6e8ef;
+            --muted: #9aa3b2;
+            --accent: #7aa2ff;
+            --danger: #ff7a7a;
+            --ok: #7affb1;
+            font-synthesis: none;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+        }
+        header {
+            position: sticky; top: 0; z-index: 5;
+            background: linear-gradient(to bottom, rgba(11,12,16,0.98), rgba(11,12,16,0.9));
+            border-bottom: 1px solid #232838;
+            padding: 14px 16px;
+            display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+        }
+        header h1 {
+            font-size: 16px; margin: 0; font-weight: 650; letter-spacing: 0.2px;
+        }
+        header .sub { color: var(--muted); font-size: 12px; }
+        main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+
+        .input-panel {
+            background: var(--panel);
+            border: 1px solid #232838;
+            border-radius: 12px;
+            padding: 12px;
+            display: grid;
+            gap: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 220px;
+            background: #0f1117;
+            color: var(--text);
+            border: 1px solid #2a2f40;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            resize: vertical;
+            outline: none;
+        }
+        textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(122,162,255,0.15); }
+
+        .controls {
+            display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+        }
+        button {
+            background: var(--accent);
+            color: #0b0c10;
+            border: none;
+            border-radius: 9px;
+            font-weight: 700;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: transform 0.04s ease, opacity 0.15s ease;
+        }
+        button:active { transform: translateY(1px); }
+        button.secondary {
+            background: #262b3d; color: var(--text); font-weight: 600;
+            border: 1px solid #2f3650;
+        }
+        .status {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .status.ok { color: var(--ok); }
+        .status.err { color: var(--danger); }
+
+        .results {
+            margin-top: 14px;
+            display: grid;
+            gap: 12px;
+        }
+        .card {
+            background: var(--panel);
+            border: 1px solid #232838;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .card-header {
+            background: var(--panel-2);
+            padding: 10px 12px;
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+            border-bottom: 1px solid #232838;
+        }
+        .card-header .key {
+            font-weight: 700; font-size: 13px; color: var(--text);
+            word-break: break-all;
+        }
+        .card-header .badge {
+            margin-left: auto;
+            font-size: 11px; color: var(--muted);
+            padding: 2px 6px; border: 1px solid #30364b; border-radius: 999px;
+            background: #10131b;
+            white-space: nowrap;
+        }
+        .card-body {
+            padding: 12px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .field {
+            background: #0f1117;
+            border: 1px solid #262b3d;
+            border-radius: 10px;
+            padding: 10px;
+            display: grid;
+            gap: 6px;
+        }
+        .field-title {
+            font-size: 12px; color: var(--muted); font-weight: 700; letter-spacing: 0.3px;
+            text-transform: none;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            color: var(--text);
+        }
+        ul {
+            margin: 0; padding-left: 18px;
+        }
+        li { margin: 2px 0; white-space: pre-wrap; word-break: break-word; }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #2a2f40;
+            background: #0b0c10;
+        }
+
+        details {
+            background: #0f1117;
+            border: 1px dashed #2a2f40;
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        summary { cursor: pointer; color: var(--muted); font-weight: 700; }
+        .hint { color: var(--muted); font-size: 12px; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Structured Object Viewer</h1>
+    <div class="sub">Paste JSON → Render. Images show inline when value is a data:image/* URI.</div>
+</header>
+
+<main>
+    <section class="input-panel">
+        <textarea id="input" spellcheck="false" placeholder="Paste your JSON object here..."></textarea>
+        <div class="controls">
+            <button id="renderBtn">Render</button>
+            <button class="secondary" id="clearBtn" title="Clear textarea and output">Clear</button>
+            <button class="secondary" id="sampleBtn" title="Load the sample from the prompt">Load sample</button>
+            <div id="status" class="status">Waiting for input…</div>
+        </div>
+        <div class="hint">
+            Notes: This runs fully client-side. Works on file:// because it uses no network or external libs.
+        </div>
+    </section>
+
+    <section id="results" class="results"></section>
+</main>
+
+<script>
+    const inputEl = document.getElementById('input');
+    const resultsEl = document.getElementById('results');
+    const statusEl = document.getElementById('status');
+
+    const SAMPLE = `{}`;
+
+    document.getElementById('sampleBtn').addEventListener('click', () => {
+        inputEl.value = SAMPLE;
+        setStatus("Sample loaded. Click Render.", "ok");
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+        inputEl.value = "";
+        resultsEl.innerHTML = "";
+        setStatus("Cleared.", "ok");
+    });
+
+    document.getElementById('renderBtn').addEventListener('click', render);
+
+    function setStatus(msg, kind) {
+        statusEl.textContent = msg;
+        statusEl.className = "status" + (kind ? (" " + kind) : "");
+    }
+
+    function isDataImageURI(v) {
+        return (typeof v === "string") && v.startsWith("data:image/");
+    }
+
+    function render(value = '') {
+        resultsEl.innerHTML = "";
+        const raw = value || inputEl.value.trim();
+        if (!raw) {
+            setStatus("Textarea is empty.", "err");
+            return;
+        }
+
+        let obj;
+        try {
+            obj = JSON.parse(raw);
+        } catch (e) {
+            setStatus("Invalid JSON: " + e.message, "err");
+            return;
+        }
+
+        if (!obj || typeof obj !== "object" || Array.isArray(obj)) {
+            setStatus("Top level must be an object.", "err");
+            return;
+        }
+
+        const topKeys = Object.keys(obj);
+        if (topKeys.length === 0) {
+            setStatus("Object has no keys.", "err");
+            return;
+        }
+
+        for (const topKey of topKeys) {
+            const section = obj[topKey];
+            resultsEl.appendChild(renderCard(topKey, section));
+        }
+
+        setStatus("Rendered " + topKeys.length + " item(s).", "ok");
+    }
+
+    function renderCard(title, section) {
+        const card = div("card");
+
+        const header = div("card-header");
+        const keyEl = div("key");
+        keyEl.textContent = title;
+        header.appendChild(keyEl);
+
+        const badge = div("badge");
+        badge.textContent = section && typeof section === "object"
+            ? Object.keys(section).length + " field(s)"
+            : "non-object";
+        header.appendChild(badge);
+
+        const body = div("card-body");
+
+        if (!section || typeof section !== "object" || Array.isArray(section)) {
+            body.appendChild(renderValue("value", section));
+        } else {
+            // second-level keys are constants, but we render whatever exists.
+            for (const k of Object.keys(section)) {
+                body.appendChild(renderValue(k, section[k]));
+            }
+
+            // If nothing inside:
+            if (Object.keys(section).length === 0) {
+                const empty = div("field");
+                empty.appendChild(div("field-title", "(empty object)"));
+                body.appendChild(empty);
+            }
+        }
+
+        card.appendChild(header);
+        card.appendChild(body);
+        return card;
+    }
+
+    function renderValue(key, value) {
+        const field = div("field");
+        field.appendChild(div("field-title", key));
+
+        if (isDataImageURI(value)) {
+            const img = document.createElement("img");
+            img.src = value;
+            img.alt = key;
+            img.addEventListener("error", () => {
+                const p = document.createElement("pre");
+                p.textContent = value;
+                field.appendChild(div("hint", "Image failed to load; showing raw value:"));
+                field.appendChild(p);
+            });
+            field.appendChild(img);
+            return field;
+        }
+
+        if (Array.isArray(value)) {
+            const ul = document.createElement("ul");
+            for (const item of value) {
+                const li = document.createElement("li");
+                if (isDataImageURI(item)) {
+                    const img = document.createElement("img");
+                    img.src = item;
+                    img.alt = key + "[]";
+                    li.appendChild(img);
+                } else {
+                    li.textContent = (typeof item === "string") ? item : JSON.stringify(item, null, 2);
+                }
+                ul.appendChild(li);
+            }
+            field.appendChild(ul);
+            return field;
+        }
+
+        if (value && typeof value === "object") {
+            // Collapsible raw object
+            const details = document.createElement("details");
+            const summary = document.createElement("summary");
+            summary.textContent = "Show object";
+            details.appendChild(summary);
+
+            const pre = document.createElement("pre");
+            pre.textContent = JSON.stringify(value, null, 2);
+            details.appendChild(pre);
+
+            field.appendChild(details);
+            return field;
+        }
+
+        const pre = document.createElement("pre");
+        pre.textContent = (value === undefined) ? "undefined" : String(value);
+        field.appendChild(pre);
+        return field;
+    }
+
+    function div(cls, text) {
+        const el = document.createElement("div");
+        if (cls) el.className = cls;
+        if (text != null) el.textContent = text;
+        return el;
+    }
+
+    // convenience: Ctrl/Cmd+Enter to render
+    inputEl.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") render();
+    });
+
+    setTimeout(() => {
+        const raw = location.href.split('?')[1];
+        if (!raw) return;
+        render(atob(raw));
+    })
+</script>
+</body>
+</html>

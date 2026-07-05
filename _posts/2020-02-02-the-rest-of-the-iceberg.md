@@ -10,9 +10,7 @@ image: iceberg1.jpg
 
 ---
 
-![](iceberg1.jpg)
-
-# The Rest of the Iceberg: Everything We've Missed About the Browser Extensions Attack Surface
+![](/content/img/iceberg1.jpg)
 
 Reading this title, you might be thinking, “dude’s late to the party”
 
@@ -28,7 +26,7 @@ Here is how my recent research reshaped the way I think about browser extensions
 
 *\~ E**X**tensions **A**gainst **W**ebsites*
 
-![](iceberg2.jpg)
+![](/content/img/iceberg2.jpg)
 
 Extensions being a horror show is common knowledge for a while now, and yet somehow only recently emerging startups were finally able to convince the industry how vulnerable companies are to them
 
@@ -56,7 +54,7 @@ I’ll do so by touching each class at a time
 
 *\~ **W**ebsites **A**gainst E**X**tensions*
 
-![](iceberg3.jpg)
+![](/content/img/iceberg3.jpg)
 
 Investigating the devices of some of our clients, an aggregated list of installed extensions came back, and it was longer than I expected
 
@@ -108,7 +106,7 @@ Part of my research into WAX class is now public for you to dig deeper [https://
 
 *\~ E**X**tensions **A**gainst **B**rowsers*
 
-![](iceberg4.jpg)
+![](/content/img/iceberg4.jpg)
 
 Did you notice how it’s the same horror story with every extension?
 
@@ -134,7 +132,7 @@ The take here is that the territory of extensions attacking browsers is widely u
 
 *\~ E**X**tensions **A**gainst the **O**perating **S**ystem*
 
-![](iceberg5.jpg)
+![](/content/img/iceberg5.jpg)
 
 This one is a little less about just browsers and slightly more about AI and how it changes the endpoint - but the point still flows through the risk in extensions
 
@@ -152,7 +150,7 @@ Browser extensions play a prominent role in that
 
 ## **But why now?**
 
-![](iceberg6.jpg)
+![](/content/img/iceberg6.jpg)
 
 Come to think about it, everything I referred to was true for years now, mainly class WAX and class XAW
 

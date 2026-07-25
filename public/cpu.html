@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>CPU Monitor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root { color-scheme: light dark; }
+
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page-plane:     #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+
+    --series-blue:    #2a78d6;
+    --series-blue-450:#2a78d6;
+    --series-blue-350:#5598e7;
+
+    --status-good:     #0ca30c;
+    --status-warning:  #fab219;
+    --status-serious:  #ec835a;
+    --status-critical: #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page-plane:     #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+
+      --series-blue:    #3987e5;
+      --series-blue-450:#3987e5;
+      --series-blue-350:#5598e7;
+
+      --status-good:     #0ca30c;
+      --status-warning:  #fab219;
+      --status-serious:  #ec835a;
+      --status-critical: #d03b3b;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page-plane:     #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+
+    --series-blue:    #3987e5;
+    --series-blue-450:#3987e5;
+    --series-blue-350:#5598e7;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--page-plane);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--text-primary);
+  }
+  .viz-root {
+    min-height: 100%;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* ---------- header ---------- */
+  .header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .header .id-block { min-width: 0; }
+  .header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 2px 0;
+    letter-spacing: 0.01em;
+  }
+  .header .meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .header .live {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .live .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--status-good);
+    display: inline-block;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--status-good) 20%, transparent);
+    margin-right: 6px;
+  }
+
+  /* ---------- cards ---------- */
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  /* ---------- hero row ---------- */
+  .hero-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 640px) {
+    .hero-row { grid-template-columns: 1fr; }
+  }
+  .hero-card {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .hero-card .label {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .hero-card .value {
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 1;
+    margin-top: 10px;
+    font-variant-numeric: proportional-nums;
+  }
+  .hero-card .sub {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-icon {
+    width: 8px; height: 8px; border-radius: 50%;
+    display: inline-block;
+    flex: none;
+  }
+
+  .chart-card {
+    padding: 14px 16px 10px 16px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .chart-card .chart-title {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+  }
+  .chart-card canvas {
+    width: 100%;
+    height: 140px;
+    display: block;
+    margin-top: 6px;
+    cursor: crosshair;
+  }
+
+  /* ---------- per-core grid ---------- */
+  .section-title {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 2px 0 0 2px;
+  }
+  .core-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+  }
+  .core-card {
+    padding: 10px 12px;
+  }
+  .core-card .row1 {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .core-card .core-name {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .core-card .core-value {
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .core-card .core-badge {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .core-card canvas {
+    width: 100%;
+    height: 34px;
+    display: block;
+    margin-top: 6px;
+  }
+
+  /* ---------- temperature strip ---------- */
+  .temp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  .temp-card {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .temp-card .core-name { font-size: 11px; color: var(--text-muted); }
+  .temp-card .core-value {
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .empty-state {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div id="cpu-monitor-root" class="viz-root">
+  <div class="header">
+    <div class="id-block">
+      <h1>CPU Monitor</h1>
+      <div class="meta" id="cm-meta">Waiting for data&hellip;</div>
+    </div>
+    <div class="live">
+      <span><span class="dot" id="cm-live-dot"></span><span id="cm-live-text">idle</span></span>
+      <span id="cm-rate">&mdash; samples/s</span>
+    </div>
+  </div>
+
+  <div class="hero-row">
+    <div class="card hero-card">
+      <div class="label">Overall CPU usage</div>
+      <div class="value" id="cm-hero-value">&mdash;</div>
+      <div class="sub"><span class="status-icon" id="cm-hero-icon"></span><span id="cm-hero-status">awaiting samples</span></div>
+    </div>
+    <div class="card chart-card">
+      <div class="chart-title">
+        <span>Usage over time (last 60s)</span>
+        <span id="cm-chart-cursor" style="font-variant-numeric: tabular-nums;"></span>
+      </div>
+      <canvas id="cm-main-canvas"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">Per-core usage</div>
+  <div class="card" style="padding: 12px;">
+    <div class="core-grid" id="cm-core-grid">
+      <div class="empty-state">Waiting for processor data&hellip;</div>
+    </div>
+  </div>
+
+  <div id="cm-temp-section" style="display:none;">
+    <div class="section-title">Temperature sensors</div>
+    <div class="card" style="padding: 12px; margin-top: 6px;">
+      <div class="temp-grid" id="cm-temp-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var WINDOW_MS = 60000;      // rolling time window shown on charts
+  var MAX_POINTS = 4000;      // hard safety cap per series regardless of call rate
+  var RATE_SAMPLE_MS = 1000;  // window for the samples/s readout
+
+  var root = document.getElementById("cpu-monitor-root");
+  var el = {
+    meta: document.getElementById("cm-meta"),
+    liveDot: document.getElementById("cm-live-dot"),
+    liveText: document.getElementById("cm-live-text"),
+    rate: document.getElementById("cm-rate"),
+    heroValue: document.getElementById("cm-hero-value"),
+    heroIcon: document.getElementById("cm-hero-icon"),
+    heroStatus: document.getElementById("cm-hero-status"),
+    chartCursor: document.getElementById("cm-chart-cursor"),
+    mainCanvas: document.getElementById("cm-main-canvas"),
+    coreGrid: document.getElementById("cm-core-grid"),
+    tempSection: document.getElementById("cm-temp-section"),
+    tempGrid: document.getElementById("cm-temp-grid"),
+  };
+
+  function cssVar(name) {
+    return getComputedStyle(root).getPropertyValue(name).trim();
+  }
+
+  // ---------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------
+  var state = {
+    numOfProcessors: 0,
+    archName: "",
+    modelName: "",
+    features: [],
+    prevProcessors: null,   // raw counters from the previous call, for delta math
+    overallHistory: [],     // [{t, v}]
+    coreHistory: [],        // per core: [{t, v}]
+    coreCurrent: [],        // per core current % (number|null)
+    overallCurrent: null,
+    tempCurrent: [],
+    callTimestamps: [],     // for samples/s readout
+    lastCallTime: 0,
+    dirty: false,
+    hoverX: null,           // mouse x over main canvas, in CSS px, or null
+  };
+
+  var cores = []; // { cardEl, canvas, valueEl, badgeEl }
+  var temps = []; // { valueEl, iconEl }
+
+  // ---------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------
+  function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+  function statusForPercent(pct) {
+    if (pct == null) return { role: "muted", color: cssVar("--text-muted"), label: "no data" };
+    if (pct >= 90) return { role: "critical", color: cssVar("--status-critical"), label: "Critical" };
+    if (pct >= 75) return { role: "serious", color: cssVar("--status-serious"), label: "High" };
+    if (pct >= 50) return { role: "warning", color: cssVar("--status-warning"), label: "Elevated" };
+    return { role: "good", color: cssVar("--status-good"), label: "Normal" };
+  }
+
+  function statusForTemp(c) {
+    if (c == null) return { color: cssVar("--text-muted"), label: "no data" };
+    if (c >= 90) return { color: cssVar("--status-critical"), label: "Critical" };
+    if (c >= 75) return { color: cssVar("--status-serious"), label: "High" };
+    if (c >= 60) return { color: cssVar("--status-warning"), label: "Elevated" };
+    return { color: cssVar("--status-good"), label: "Normal" };
+  }
+
+  function pushSample(arr, t, v) {
+    arr.push({ t: t, v: v });
+    var cutoff = t - WINDOW_MS;
+    var dropTo = 0;
+    while (dropTo < arr.length && arr[dropTo].t < cutoff) dropTo++;
+    if (dropTo > 0) arr.splice(0, dropTo);
+    var overflow = arr.length - MAX_POINTS;
+    if (overflow > 0) arr.splice(0, overflow);
+  }
+
+  function fmtPct(v) {
+    return v == null ? "—" : Math.round(v) + "%";
+  }
+
+  // ---------------------------------------------------------------------
+  // DOM construction (built once, or rebuilt if processor count changes)
+  // ---------------------------------------------------------------------
+  function ensureLayout(data) {
+    var n = data.processors ? data.processors.length : 0;
+    if (n === state.numOfProcessors && cores.length === n) {
+      return; // already built
+    }
+    state.numOfProcessors = n;
+    state.coreHistory = [];
+    state.coreCurrent = [];
+    cores = [];
+    el.coreGrid.innerHTML = "";
+
+    for (var i = 0; i < n; i++) {
+      state.coreHistory.push([]);
+      state.coreCurrent.push(null);
+
+      var card = document.createElement("div");
+      card.className = "card core-card";
+
+      var row1 = document.createElement("div");
+      row1.className = "row1";
+      var name = document.createElement("div");
+      name.className = "core-name";
+      name.textContent = "Core " + i;
+      var value = document.createElement("div");
+      value.className = "core-value";
+      var dot = document.createElement("span");
+      dot.className = "status-icon";
+      var valText = document.createElement("span");
+      valText.textContent = "—";
+      var badge = document.createElement("span");
+      badge.className = "core-badge";
+      value.appendChild(dot);
+      value.appendChild(valText);
+      value.appendChild(badge);
+      row1.appendChild(name);
+      row1.appendChild(value);
+
+      var canvas = document.createElement("canvas");
+
+      card.appendChild(row1);
+      card.appendChild(canvas);
+      el.coreGrid.appendChild(card);
+
+      cores.push({ card: card, canvas: canvas, ctx: canvas.getContext("2d"), dot: dot, valText: valText, badge: badge });
+    }
+  }
+
+  function ensureTempLayout(data) {
+    var temperatures = data.temperatures || [];
+    if (temperatures.length === 0) {
+      el.tempSection.style.display = "none";
+      return;
+    }
+    el.tempSection.style.display = "";
+    if (temps.length === temperatures.length) return;
+
+    el.tempGrid.innerHTML = "";
+    temps = [];
+    for (var i = 0; i < temperatures.length; i++) {
+      var card = document.createElement("div");
+      card.className = "card temp-card";
+      var name = document.createElement("div");
+      name.className = "core-name";
+      name.textContent = "Sensor " + i;
+      var value = document.createElement("div");
+      value.className = "core-value";
+      var dot = document.createElement("span");
+      dot.className = "status-icon";
+      var valText = document.createElement("span");
+      valText.textContent = "—";
+      value.appendChild(dot);
+      value.appendChild(valText);
+      card.appendChild(name);
+      card.appendChild(value);
+      el.tempGrid.appendChild(card);
+      temps.push({ dot: dot, valText: valText });
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Public entry point
+  // ---------------------------------------------------------------------
+  window.render = function (data) {
+    if (!data || !data.processors) return;
+
+    var now = performance.now();
+
+    // samples/s bookkeeping
+    state.callTimestamps.push(now);
+    var cutoff = now - RATE_SAMPLE_MS;
+    while (state.callTimestamps.length && state.callTimestamps[0] < cutoff) {
+      state.callTimestamps.shift();
+    }
+    state.lastCallTime = now;
+
+    ensureLayout(data);
+    ensureTempLayout(data);
+
+    state.archName = data.archName || "";
+    state.modelName = data.modelName || "";
+    state.features = data.features || [];
+
+    // --- per-core delta usage ---
+    var prev = state.prevProcessors;
+    var sumBusy = 0, sumWeighted = 0, validCores = 0;
+
+    for (var i = 0; i < data.processors.length; i++) {
+      var usage = data.processors[i] && data.processors[i].usage;
+      if (!usage) continue;
+      var pct = null;
+      if (prev && prev[i]) {
+        var dTotal = usage.total - prev[i].total;
+        var dIdle = usage.idle - prev[i].idle;
+        if (dTotal > 0) {
+          pct = clamp(100 * (1 - dIdle / dTotal), 0, 100);
+        }
+      }
+      if (pct != null) {
+        state.coreCurrent[i] = pct;
+        pushSample(state.coreHistory[i], now, pct);
+        sumBusy += pct;
+        validCores++;
+      }
+    }
+
+    if (validCores > 0) {
+      var avg = sumBusy / validCores;
+      state.overallCurrent = avg;
+      pushSample(state.overallHistory, now, avg);
+    }
+
+    // stash raw counters for next delta
+    state.prevProcessors = data.processors.map(function (p) {
+      return p && p.usage ? { total: p.usage.total, idle: p.usage.idle } : null;
+    });
+
+    // --- temperatures (already instantaneous, no delta needed) ---
+    state.tempCurrent = (data.temperatures || []).slice();
+
+    state.dirty = true;
+  };
+
+  // ---------------------------------------------------------------------
+  // Canvas line/area chart primitive
+  // ---------------------------------------------------------------------
+  function setupCanvasDPR(canvas) {
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    var w = Math.max(1, Math.round(rect.width));
+    var h = Math.max(1, Math.round(rect.height));
+    if (canvas._cssW !== w || canvas._cssH !== h || canvas._dpr !== dpr) {
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas._cssW = w;
+      canvas._cssH = h;
+      canvas._dpr = dpr;
+    }
+    var ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx: ctx, w: w, h: h };
+  }
+
+  function xForT(t, now, w) {
+    return w * (1 - (now - t) / WINDOW_MS);
+  }
+
+  function drawSeries(canvas, points, opts) {
+    var dims = setupCanvasDPR(canvas);
+    var ctx = dims.ctx, w = dims.w, h = dims.h;
+    var now = performance.now();
+    ctx.clearRect(0, 0, w, h);
+
+    var padTop = opts.padTop || 4;
+    var padBottom = opts.padBottom || 4;
+    var plotH = Math.max(1, h - padTop - padBottom);
+    var min = opts.min != null ? opts.min : 0;
+    var max = opts.max != null ? opts.max : 100;
+
+    if (opts.showGrid) {
+      ctx.strokeStyle = cssVar("--gridline");
+      ctx.lineWidth = 1;
+      var steps = 4;
+      for (var s = 0; s <= steps; s++) {
+        var gy = padTop + (plotH * s) / steps;
+        ctx.beginPath();
+        ctx.moveTo(0, Math.round(gy) + 0.5);
+        ctx.lineTo(w, Math.round(gy) + 0.5);
+        ctx.stroke();
+      }
+    }
+
+    if (!points || points.length < 2) {
+      return { w: w, h: h, padTop: padTop, plotH: plotH, min: min, max: max };
+    }
+
+    function yFor(v) {
+      var t = (v - min) / (max - min || 1);
+      return padTop + plotH * (1 - clamp(t, 0, 1));
+    }
+
+    // build path, keep only points within the visible window
+    var cutoff = now - WINDOW_MS;
+    var pts = [];
+    for (var i = 0; i < points.length; i++) {
+      if (points[i].t >= cutoff) pts.push(points[i]);
+    }
+    if (pts.length < 2) return { w: w, h: h, padTop: padTop, plotH: plotH, min: min, max: max };
+
+    ctx.beginPath();
+    for (var j = 0; j < pts.length; j++) {
+      var x = xForT(pts[j].t, now, w);
+      var y = yFor(pts[j].v);
+      if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+
+    if (opts.area) {
+      var lastX = xForT(pts[pts.length - 1].t, now, w);
+      var firstX = xForT(pts[0].t, now, w);
+      ctx.lineTo(lastX, padTop + plotH);
+      ctx.lineTo(firstX, padTop + plotH);
+      ctx.closePath();
+      ctx.fillStyle = opts.color;
+      ctx.globalAlpha = 0.10;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // redraw the stroke path cleanly (closePath above altered the path)
+      ctx.beginPath();
+      for (var k = 0; k < pts.length; k++) {
+        var xx = xForT(pts[k].t, now, w);
+        var yy = yFor(pts[k].v);
+        if (k === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
+      }
+    }
+
+    ctx.strokeStyle = opts.color;
+    ctx.lineWidth = opts.lineWidth || 2;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.stroke();
+
+    // end marker with surface ring
+    var endPt = pts[pts.length - 1];
+    var ex = xForT(endPt.t, now, w);
+    var ey = yFor(endPt.v);
+    if (opts.endDot) {
+      ctx.beginPath();
+      ctx.arc(ex, ey, 5, 0, Math.PI * 2);
+      ctx.fillStyle = cssVar("--surface-1");
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex, ey, 4, 0, Math.PI * 2);
+      ctx.fillStyle = opts.color;
+      ctx.fill();
+    }
+
+    return { w: w, h: h, padTop: padTop, plotH: plotH, min: min, max: max, pts: pts, yFor: yFor };
+  }
+
+  // ---------------------------------------------------------------------
+  // Main chart hover crosshair + tooltip
+  // ---------------------------------------------------------------------
+  el.mainCanvas.addEventListener("mousemove", function (e) {
+    var rect = el.mainCanvas.getBoundingClientRect();
+    state.hoverX = clamp(e.clientX - rect.left, 0, rect.width);
+    state.dirty = true;
+  });
+  el.mainCanvas.addEventListener("mouseleave", function () {
+    state.hoverX = null;
+    el.chartCursor.textContent = "";
+    state.dirty = true;
+  });
+
+  function drawMainChart() {
+    var geom = drawSeries(el.mainCanvas, state.overallHistory, {
+      color: cssVar("--series-blue-450"),
+      area: true,
+      endDot: true,
+      showGrid: true,
+      padTop: 8,
+      padBottom: 8,
+      min: 0,
+      max: 100,
+    });
+
+    if (state.hoverX == null || !geom.pts || geom.pts.length < 2) return;
+
+    var ctx = geom.ctx || el.mainCanvas.getContext("2d");
+    var now = performance.now();
+    var w = geom.w;
+
+    // find nearest point to hoverX by time
+    var targetT = now - WINDOW_MS * (1 - state.hoverX / w);
+    var best = geom.pts[0], bestDist = Infinity;
+    for (var i = 0; i < geom.pts.length; i++) {
+      var d = Math.abs(geom.pts[i].t - targetT);
+      if (d < bestDist) { bestDist = d; best = geom.pts[i]; }
+    }
+    var hx = xForT(best.t, now, w);
+    var hy = geom.yFor(best.v);
+
+    ctx.save();
+    ctx.strokeStyle = cssVar("--baseline");
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(Math.round(hx) + 0.5, geom.padTop);
+    ctx.lineTo(Math.round(hx) + 0.5, geom.padTop + geom.plotH);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(hx, hy, 4, 0, Math.PI * 2);
+    ctx.fillStyle = cssVar("--surface-1");
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(hx, hy, 3, 0, Math.PI * 2);
+    ctx.fillStyle = cssVar("--series-blue-450");
+    ctx.fill();
+    ctx.restore();
+
+    var secondsAgo = Math.round((now - best.t) / 1000);
+    el.chartCursor.textContent = Math.round(best.v) + "% · " + (secondsAgo <= 0 ? "now" : secondsAgo + "s ago");
+  }
+
+  function drawCoreSparklines() {
+    for (var i = 0; i < cores.length; i++) {
+      drawSeries(cores[i].canvas, state.coreHistory[i], {
+        color: cssVar("--series-blue-350"),
+        area: false,
+        endDot: false,
+        showGrid: false,
+        padTop: 3,
+        padBottom: 3,
+        lineWidth: 1.5,
+        min: 0,
+        max: 100,
+      });
+
+      var pct = state.coreCurrent[i];
+      var st = statusForPercent(pct);
+      cores[i].valText.textContent = fmtPct(pct);
+      cores[i].dot.style.background = st.color;
+      cores[i].badge.textContent = st.role === "good" || st.role === "muted" ? "" : st.label;
+      cores[i].badge.style.color = st.color;
+    }
+  }
+
+  function drawTemps() {
+    for (var i = 0; i < temps.length; i++) {
+      var c = state.tempCurrent[i];
+      var st = statusForTemp(c);
+      temps[i].valText.textContent = c == null ? "—" : Math.round(c) + "°C";
+      temps[i].dot.style.background = st.color;
+    }
+  }
+
+  function updateHeroAndHeader() {
+    var pct = state.overallCurrent;
+    var st = statusForPercent(pct);
+    el.heroValue.textContent = fmtPct(pct);
+    el.heroIcon.style.background = st.color;
+    el.heroStatus.textContent = pct == null ? "awaiting samples" : st.label + " load";
+
+    var metaParts = [];
+    if (state.modelName) metaParts.push(state.modelName);
+    if (state.archName) metaParts.push(state.archName);
+    metaParts.push(state.numOfProcessors + (state.numOfProcessors === 1 ? " core" : " cores"));
+    el.meta.textContent = metaParts.join(" · ") || "Waiting for data…";
+    if (state.features && state.features.length) {
+      el.meta.title = "Features: " + state.features.join(", ");
+    }
+
+    var sinceLast = performance.now() - state.lastCallTime;
+    var live = state.lastCallTime > 0 && sinceLast < 3000;
+    el.liveDot.style.background = live ? cssVar("--status-good") : cssVar("--text-muted");
+    el.liveText.textContent = live ? "live" : (state.lastCallTime > 0 ? "stalled" : "idle");
+    el.rate.textContent = state.callTimestamps.length + " samples/s";
+  }
+
+  // ---------------------------------------------------------------------
+  // Draw loop — decoupled from render() call frequency
+  // ---------------------------------------------------------------------
+  function frame() {
+    updateHeroAndHeader();
+    drawMainChart();
+    drawCoreSparklines();
+    drawTemps();
+    state.dirty = false;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
